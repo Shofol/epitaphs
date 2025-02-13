@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { EB_Garamond } from "next/font/google";
 import "./globals.css";
 import Head from "next/head";
+import { Toaster } from "@/components/ui/toaster";
 
 const ebGaramond = EB_Garamond({
   variable: "--font-eb-garamond",
@@ -39,7 +40,10 @@ export default function RootLayout({
       <body
         className={`${ebGaramond.variable} ${ebGaramond.variable} antialiased`}
       >
-        {children}
+        <>
+          {children}
+          <Toaster />
+        </>
       </body>
     </html>
   );
