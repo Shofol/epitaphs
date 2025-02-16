@@ -12,11 +12,6 @@ import {
 import React, { useState } from "react";
 import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
 import { register } from "@/actions/register";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,9 +26,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import EpSpinner from "@/components/ui/ep-spinner";
+import VerificationForm from "./verification";
 
 const Register = () => {
+  const [open, setOpen] = React.useState(false);
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   const [emailSent, setemailSent] = useState(false);
 
   const formSchema = z.object({
@@ -65,6 +64,7 @@ const Register = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (values) {
       try {
+        setLoading(true);
         const result = await register({
           email: values.email,
           password: values.password,
@@ -82,16 +82,19 @@ const Register = () => {
             title: "Success",
             description: "User Created Succesfully.",
           });
+          setemailSent(true);
         }
+        setLoading(false);
       } catch (error) {
         console.log(error);
+        setLoading(false);
       }
     }
   }
 
   return (
     <div className="font-garamond">
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button
             variant={"secondary"}
@@ -193,6 +196,7 @@ const Register = () => {
                     className="text-lg font-bold"
                     type="submit"
                   >
+                    <EpSpinner className={loading ? "visible" : "hidden"} />
                     Sign Up
                   </Button>
                 </div>
@@ -201,31 +205,13 @@ const Register = () => {
           )}
 
           {emailSent && (
-            <>
-              <p className="p-5 text-center text-xl text-secondary">
-                A verification code has been sent to your email. Please check
-                your email and enter the code to proceed.
-              </p>
-              <div className="mb-5 flex justify-center">
-                <InputOTP
-                  maxLength={6}
-                  // value={value}
-                  // onChange={(value) => setValue(value)}
-                >
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
-                  </InputOTPGroup>
-                </InputOTP>
-              </div>
-            </>
+            <VerificationForm
+              email={form.getValues("email")}
+              onSuccess={() => {
+                setOpen(false);
+              }}
+            />
           )}
-
-          {/* <DialogFooter></DialogFooter> */}
         </DialogContent>
       </Dialog>
     </div>

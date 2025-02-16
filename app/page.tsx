@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import Register from "./components/register";
+import Register from "./components/auth/register";
+import Login from "./components/auth/login";
 
 export default function Home() {
   return (
@@ -17,9 +17,7 @@ export default function Home() {
           />
           <span className="mx-4 text-4xl text-secondary">Epitaphs</span>
         </div>
-        <Button variant={"secondary"} size={"lg"} className="text-xl font-bold">
-          Login
-        </Button>
+        <Login />
       </nav>
       <main className="mx-auto max-w-7xl px-5 lg:px-0">
         <h1 className="mt-10 text-justify text-4xl text-secondary">

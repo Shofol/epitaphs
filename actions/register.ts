@@ -19,11 +19,19 @@ export const register = async (values: UserDocument) => {
 
     const user = new User({
       verificationCode,
+      verificationCodeExpires: new Date(Date.now() + 15 * 60 * 1000),
       verified: false,
       email,
       password: hashedPassword,
     });
     await user.save();
+    await fetch(`${process.env.URL}/api/send`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        verificationCode: verificationCode,
+      }),
+    });
   } catch (e) {
     console.log(e);
   }

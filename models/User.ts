@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 
 export interface UserDocument {
   _id?: string;
@@ -11,6 +11,7 @@ export interface UserDocument {
   createdAt?: Date;
   updatedAt?: Date;
   verificationCode?: number;
+  verificationCodeExpires?: Date;
 }
 
 const UserSchema = new Schema<UserDocument>(
@@ -36,10 +37,16 @@ const UserSchema = new Schema<UserDocument>(
     verified: {
       type: Boolean,
       required: true,
+      default: false,
     },
     verificationCode: {
       type: Number,
       required: true,
+    },
+    verificationCodeExpires: {
+      type: Date, // Ensure it is stored as a Date
+      required: true,
+      index: { expireAfterSeconds: 0 },
     },
   },
   {
@@ -47,5 +54,5 @@ const UserSchema = new Schema<UserDocument>(
   },
 );
 
-const User = model<UserDocument>("User", UserSchema);
+const User = mongoose.models.User || model<UserDocument>("User", UserSchema);
 export default User;
