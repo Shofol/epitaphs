@@ -3,8 +3,27 @@
 import Image from "next/image";
 import Register from "./components/auth/register";
 import Login from "./components/auth/login";
+import { signOut, useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
+  const session = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (session.status === "authenticated" && session.data.expires) {
+      const sessionExpiry = new Date(session.data.expires).getTime();
+      const now = Date.now();
+
+      if (now > sessionExpiry) {
+        signOut(); // Log out user
+        router.push("/login"); // Redirect to login page
+      }
+    }
+  }, [session, router]);
+
   return (
     <div className="min-h-screen w-screen bg-primary pb-10 font-garamond">
       <nav className="flex w-screen items-center justify-between px-10 py-5">
@@ -17,7 +36,22 @@ export default function Home() {
           />
           <span className="mx-4 text-4xl text-secondary">Epitaphs</span>
         </div>
-        <Login />
+
+        {session.status === "authenticated" ? (
+          <Button
+            variant={"secondary"}
+            size={"lg"}
+            className="text-lg font-bold"
+            type="button"
+            onClick={() => {
+              signOut({ redirect: false });
+            }}
+          >
+            Logout
+          </Button>
+        ) : (
+          <Login />
+        )}
       </nav>
       <main className="mx-auto max-w-7xl px-5 lg:px-0">
         <h1 className="mt-10 text-justify text-4xl text-secondary">

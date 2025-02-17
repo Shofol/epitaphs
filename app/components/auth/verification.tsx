@@ -6,20 +6,25 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { toast } from "@/hooks/use-toast";
+import toastService from "@/lib/toastservice";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const VerificationForm = ({
   email,
+  password,
   onSuccess,
 }: {
   email: string;
+  password: string;
   onSuccess: () => void;
 }) => {
   const [verificationCode, setVerificationCode] = useState<string | undefined>(
     undefined,
   );
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleVerification = async () => {
     setLoading(true);
@@ -27,18 +32,21 @@ const VerificationForm = ({
       if (verificationCode && verificationCode.length === 6) {
         const res = await verify({ email, verificationCode });
         if (res?.error) {
-          toast({
-            variant: "destructive",
-            title: "Error!",
-            description: res.error as string,
-          });
+          toastService.error(res.error as string);
         } else {
-          toast({
-            variant: "success",
-            title: "Success",
-            description: "Email Verified Succesfully.",
-          });
+          toastService.success("Email Verified Succesfully.");
           onSuccess();
+
+          const result = await signIn("credentials", {
+            email: email,
+            password: password,
+            redirect: false,
+          });
+          if (result?.error) {
+            toastService.error(result?.error);
+          } else {
+            router.push("/home");
+          }
         }
         setLoading(false);
       }

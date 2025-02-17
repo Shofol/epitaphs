@@ -27,11 +27,30 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!passwordMatch) throw new Error("Wrong Password");
+        if (!user.verified)
+          throw new Error("Email is not verified yet. Please verify to login");
         return user;
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      // Store the user data inside token (only on first login)
+      if (user) {
+        token.verified = user.verified; // Add verified flag to token
+        token.id = user.id; // Optional: Store user ID
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // Pass the verified flag to the session
+      session.user.verified = token.verified;
+      session.user.id = token.id; // Optional: Store user ID in session
+      return session;
+    },
+  },
   session: {
     strategy: "jwt",
+    maxAge: 1 * 60,
   },
 };

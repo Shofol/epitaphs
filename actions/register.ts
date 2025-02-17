@@ -24,15 +24,27 @@ export const register = async (values: UserDocument) => {
       email,
       password: hashedPassword,
     });
-    await user.save();
-    await fetch(`${process.env.URL}/api/send`, {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        verificationCode: verificationCode,
-      }),
-    });
+    try {
+      await user.save();
+      await fetch(`${process.env.URL}/api/send`, {
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          verificationCode: verificationCode,
+          email: email,
+        }),
+      });
+    } catch (error) {
+      console.log(error);
+      return {
+        error: error.message,
+      };
+    }
   } catch (e) {
     console.log(e);
+
+    return {
+      error: e.message,
+    };
   }
 };

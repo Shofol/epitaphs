@@ -12,6 +12,7 @@ export interface UserDocument {
   updatedAt?: Date;
   verificationCode?: number;
   verificationCodeExpires?: Date;
+  passwordResetLinkExpires?: Date;
 }
 
 const UserSchema = new Schema<UserDocument>(
@@ -46,6 +47,10 @@ const UserSchema = new Schema<UserDocument>(
     verificationCodeExpires: {
       type: Date, // Ensure it is stored as a Date
       required: true,
+      index: { expireAfterSeconds: 0 },
+    },
+    passwordResetLinkExpires: {
+      type: Date, // Ensure it is stored as a Date
       index: { expireAfterSeconds: 0 },
     },
   },

@@ -21,16 +21,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import EpSpinner from "@/components/ui/ep-spinner";
 import { useState } from "react";
+import toastService from "@/lib/toastservice";
+import { Checkbox } from "@/components/ui/checkbox";
+import ForgotPassword from "./forgotPassword";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   const formSchema = z.object({
     email: z
@@ -47,6 +50,7 @@ const Login = () => {
       .regex(/[a-z]/, "Password must contain at least one lowercase letter")
       .regex(/[0-9]/, "Password must contain at least one number")
       .regex(/[\W_]/, "Password must contain at least one special character"),
+    rememberme: z.boolean(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,6 +58,7 @@ const Login = () => {
     defaultValues: {
       email: "",
       password: "",
+      rememberme: false,
     },
   });
 
@@ -67,17 +72,9 @@ const Login = () => {
           redirect: false,
         });
         if (result?.error) {
-          toast({
-            variant: "destructive",
-            title: "Error!",
-            description: result?.error,
-          });
+          toastService.error(result?.error);
         } else if (result?.ok) {
-          toast({
-            variant: "success",
-            title: "Success",
-            description: "Login Succesful.",
-          });
+          toastService.success("Login Succesful.");
           return router.push("/home");
         }
         setLoading(false);
@@ -90,7 +87,7 @@ const Login = () => {
 
   return (
     <div className="font-garamond">
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button
             variant={"secondary"}
@@ -117,61 +114,98 @@ const Login = () => {
               </div>
             </DialogTitle>
           </DialogHeader>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4 px-3 py-5"
-            >
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="hello@gmaill.com"
-                        {...field}
-                        type="email"
-                        autoComplete="user-email"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="********"
-                        {...field}
-                        type="password"
-                        autoComplete="current-password"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          {!showForgotPassword && (
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4 px-3 py-5"
+              >
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="hello@gmail.com"
+                          {...field}
+                          type="email"
+                          autoComplete="user-email"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="********"
+                          {...field}
+                          type="password"
+                          autoComplete="current-password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex items-center justify-between pt-2 text-secondary">
+                  <FormField
+                    control={form.control}
+                    name="rememberme"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="ml-2">Remember Me</FormLabel>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    variant={"link"}
+                    type="button"
+                    onClick={() => {
+                      setShowForgotPassword(true);
+                    }}
+                  >
+                    Forgot Password
+                  </Button>
+                </div>
 
-              <div className="flex justify-end pt-4">
-                <Button
-                  variant={"secondary"}
-                  size={"lg"}
-                  className="text-lg font-bold"
-                  type="submit"
-                >
-                  <EpSpinner className={loading ? "visible" : "hidden"} />
-                  Login
-                </Button>
-              </div>
-            </form>
-          </Form>
+                <div className="flex justify-end pt-4">
+                  <Button
+                    variant={"secondary"}
+                    size={"lg"}
+                    className="text-lg font-bold"
+                    type="submit"
+                  >
+                    <EpSpinner className={loading ? "visible" : "hidden"} />
+                    Login
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          )}
+          {showForgotPassword && (
+            <ForgotPassword
+              onSuccess={() => {
+                setOpen(false);
+                setShowForgotPassword(false);
+              }}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

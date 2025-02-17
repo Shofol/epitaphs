@@ -3,6 +3,7 @@ import { EB_Garamond } from "next/font/google";
 import "./globals.css";
 import Head from "next/head";
 import { Toaster } from "@/components/ui/toaster";
+import { Provider } from "./provider";
 
 const ebGaramond = EB_Garamond({
   variable: "--font-eb-garamond",
@@ -37,14 +38,16 @@ export default function RootLayout({
         />
         <link rel="manifest" href="/favicon/site.webmanifest" />
       </Head>
-      <body
-        className={`${ebGaramond.variable} ${ebGaramond.variable} antialiased`}
-      >
-        <>
-          {children}
-          <Toaster />
-        </>
-      </body>
+      <Provider>
+        <body
+          className={`${ebGaramond.variable} ${ebGaramond.variable} antialiased`}
+        >
+          <>
+            {children}
+            <Toaster />
+          </>
+        </body>
+      </Provider>
     </html>
   );
 }

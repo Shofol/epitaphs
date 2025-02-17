@@ -25,13 +25,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
 import EpSpinner from "@/components/ui/ep-spinner";
 import VerificationForm from "./verification";
+import toastService from "@/lib/toastservice";
 
 const Register = () => {
-  const [open, setOpen] = React.useState(false);
-  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailSent, setemailSent] = useState(false);
 
@@ -70,18 +69,10 @@ const Register = () => {
           password: values.password,
         });
         if (result?.error) {
-          toast({
-            variant: "destructive",
-            title: "Error!",
-            description: result?.error,
-          });
+          toastService.error(result?.error);
           return;
         } else {
-          toast({
-            variant: "success",
-            title: "Success",
-            description: "User Created Succesfully.",
-          });
+          toastService.success("User Registered Succesfully.");
           setemailSent(true);
         }
         setLoading(false);
@@ -207,6 +198,7 @@ const Register = () => {
           {emailSent && (
             <VerificationForm
               email={form.getValues("email")}
+              password={form.getValues("password")}
               onSuccess={() => {
                 setOpen(false);
               }}

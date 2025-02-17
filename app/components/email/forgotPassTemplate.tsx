@@ -1,36 +1,32 @@
 import * as React from "react";
 
 interface EmailTemplateProps {
-  verificationCode: string;
+  email: string;
   baseUrl: string;
 }
 
 export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
-  verificationCode,
+  email,
   baseUrl,
 }) => (
-  <div>
+  <div className="border-2 border-primary p-10">
     <p>
-      Hello, Before we can set up your Epitaphs account, we need to confirm your
-      email.
-      <br />
-      Either enter this 6 digit code: <b>{verificationCode} </b>
-      <br />
-      Or click the link below to confirm your account.
+      We received a request to reset your Epitaphs password. If you made this
+      request, click the link below to reset your password.
       <br />
       <a
-        href={`${baseUrl}/auth/verify?code=${verificationCode}`}
+        href={`${baseUrl}/auth/reset-password?email=${email}`}
         target="_blank"
         rel="noreferrer"
       >
-        {`${baseUrl}/auth/verify?code=${verificationCode}`}
+        {`${baseUrl}/auth/reset-password?email=${email}`}
       </a>
       <br />
       The link and code will expire in 15 minutes, if you did not sign up for an
       account on Epitaphs you can safely ignore this email.
     </p>
     <p>
-      Welcome, <br />
+      Thank You, <br />
       The Epitaphs Team
     </p>
   </div>
