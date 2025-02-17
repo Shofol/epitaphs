@@ -3,10 +3,10 @@ import User from "@/models/User";
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }, // Fix params type
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   await connectDB();
-  const userFound = await User.findOne({ email: params.slug }).lean(); // Convert Mongoose object to plain JSON
+  const userFound = await User.findOne({ email: (await params).slug }).lean(); // Convert Mongoose object to plain JSON
 
   if (userFound) {
     return Response.json({ data: userFound });

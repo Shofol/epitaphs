@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import EpSpinner from "@/components/ui/ep-spinner";
 import { useRouter } from "next/navigation";
@@ -22,7 +22,7 @@ import { useForm } from "react-hook-form";
 import Image from "next/image";
 import { reset } from "@/actions/resetPassword";
 
-const ResetPassword = () => {
+const ResetPasswordComponent = () => {
   const searchParams = useSearchParams();
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -107,7 +107,7 @@ const ResetPassword = () => {
         }
         router.push("/");
       } catch (error) {
-        toastService.error(error);
+        toastService.error((error as Error).message);
         router.push("/");
       }
       setLoading(true);
@@ -191,6 +191,14 @@ const ResetPassword = () => {
         </div>
       )}
     </div>
+  );
+};
+
+const ResetPassword = () => {
+  return (
+    <Suspense fallback={<p>Loading...</p>}>
+      <ResetPasswordComponent />
+    </Suspense>
   );
 };
 

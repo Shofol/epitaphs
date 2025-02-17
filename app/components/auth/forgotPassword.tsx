@@ -17,8 +17,9 @@ const ForgotPassword = ({ onSuccess }: { onSuccess: () => void }) => {
         email: email,
       }),
     });
-    if (res?.error) {
-      toastService.error(res.error);
+
+    if (!res.ok) {
+      toastService.error("Operation Failed");
     } else {
       toastService.success(
         "Password reset link is sent. Please check your email.",
@@ -38,11 +39,6 @@ const ForgotPassword = ({ onSuccess }: { onSuccess: () => void }) => {
         defaultValue={email}
         onChange={(e) => {
           setEmail(e.target.value);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            submit();
-          }
         }}
         autoComplete="user-email"
       />

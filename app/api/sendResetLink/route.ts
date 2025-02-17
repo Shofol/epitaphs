@@ -23,7 +23,6 @@ export async function POST(request: Request) {
       }) as React.ReactElement,
     });
 
-    console.log(error);
     if (error) {
       return Response.json({ error }, { status: 500 });
     }

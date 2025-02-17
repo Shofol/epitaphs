@@ -35,16 +35,15 @@ export const register = async (values: UserDocument) => {
         }),
       });
     } catch (error) {
-      console.log(error);
       return {
-        error: error.message,
+        error: (error as Error).message,
       };
     }
   } catch (e) {
     console.log(e);
 
     return {
-      error: e.message,
+      error: (e as Error).message,
     };
   }
 };

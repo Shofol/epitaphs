@@ -44,8 +44,8 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       // Pass the verified flag to the session
-      session.user.verified = token.verified;
-      session.user.id = token.id; // Optional: Store user ID in session
+      session.user.verified = token.verified as boolean;
+      session.user.id = token.id as string; // Optional: Store user ID in session
       return session;
     },
   },

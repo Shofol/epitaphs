@@ -21,7 +21,7 @@ export const reset = async (email: string, password: string) => {
     return { data: JSON.parse(JSON.stringify(user)) };
   } catch (e) {
     return {
-      error: e.message,
+      error: (e as Error).message,
     };
   }
 };

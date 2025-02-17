@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import EpSpinner from "@/components/ui/ep-spinner";
 import { verify } from "@/actions/verify";
 import { useRouter } from "next/navigation";
 import toastService from "@/lib/toastservice";
 
-const Verify = () => {
+const VerifyComponent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const email = searchParams.get("email")!;
@@ -46,6 +46,14 @@ const Verify = () => {
         </p>
       </div>
     </div>
+  );
+};
+
+const Verify = () => {
+  return (
+    <Suspense fallback={<p>Loading...</p>}>
+      <VerifyComponent />
+    </Suspense>
   );
 };
 
