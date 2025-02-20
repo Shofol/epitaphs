@@ -8,6 +8,7 @@ export interface UserDocument {
   phone?: string;
   image?: string;
   verified?: string;
+  active: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   verificationCode?: number;
@@ -39,6 +40,11 @@ const UserSchema = new Schema<UserDocument>(
       type: Boolean,
       required: true,
       default: false,
+    },
+    active: {
+      type: Boolean,
+      required: true,
+      default: true,
     },
     verificationCode: {
       type: Number,

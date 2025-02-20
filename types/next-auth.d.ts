@@ -4,6 +4,7 @@ import { DefaultSession, DefaultUser } from "next-auth";
 declare module "next-auth" {
   interface User extends DefaultUser {
     verified: boolean; // ✅ Add the verified property
+    maxAge?: number;
   }
 
   interface Session {
@@ -19,5 +20,6 @@ declare module "next-auth" {
   interface JWT {
     id?: string;
     verified?: boolean; // ✅ Add verified to JWT
+    maxAge?: number;
   }
 }

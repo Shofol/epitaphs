@@ -1,13 +1,27 @@
-import { Resend } from "resend";
+import { ErrorResponse, Resend } from "resend";
 import * as React from "react";
 import { EmailTemplate } from "@/app/components/email/forgotPassTemplate";
 import User from "@/models/User";
+import { connectDB } from "@/lib/mongodb";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
   try {
     const { email } = await request.json();
+    await connectDB();
+    const user = await User.findOne({
+      email: email,
+    });
+
+    if (!user || !user.verified) {
+      const error: ErrorResponse = {
+        message: "Inavlid Email",
+        name: "not_found",
+      };
+      return Response.json({ error }, { status: 500 });
+    }
+
     // Extract host from request headers
     const host = request.headers.get("host");
     const protocol = host?.includes("localhost") ? "http" : "https"; // Determine protocol

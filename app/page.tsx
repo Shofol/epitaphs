@@ -13,15 +13,16 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    if (session.status === "authenticated" && session.data.expires) {
-      const sessionExpiry = new Date(session.data.expires).getTime();
-      const now = Date.now();
+    console.log(session);
+    // if (session.status === "authenticated" && session.data.expires) {
+    //   const sessionExpiry = new Date(session.data.expires).getTime();
+    //   const now = Date.now();
 
-      if (now > sessionExpiry) {
-        signOut(); // Log out user
-        router.push("/login"); // Redirect to login page
-      }
-    }
+    //   if (now > sessionExpiry) {
+    //     signOut(); // Log out user
+    //     router.push("/"); // Redirect to login page
+    //   }
+    // }
   }, [session, router]);
 
   return (

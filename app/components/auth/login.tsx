@@ -24,16 +24,18 @@ import {
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import EpSpinner from "@/components/ui/ep-spinner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toastService from "@/lib/toastservice";
 import { Checkbox } from "@/components/ui/checkbox";
 import ForgotPassword from "./forgotPassword";
+import { inactivate } from "@/actions/inactivate";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
 
   const formSchema = z.object({
     email: z
@@ -50,7 +52,7 @@ const Login = () => {
       .regex(/[a-z]/, "Password must contain at least one lowercase letter")
       .regex(/[0-9]/, "Password must contain at least one number")
       .regex(/[\W_]/, "Password must contain at least one special character"),
-    rememberme: z.boolean(),
+    rememberMe: z.boolean(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -58,20 +60,36 @@ const Login = () => {
     defaultValues: {
       email: "",
       password: "",
-      rememberme: false,
+      rememberMe: false,
     },
   });
+
+  useEffect(() => {
+    const inactivateAccount = async () => {
+      const res = await inactivate(form.getValues("email"));
+      console.log(res);
+      setShowForgotPassword(true);
+      form.reset();
+    };
+
+    if (failedAttempts === 5) {
+      inactivateAccount();
+    }
+  }, [failedAttempts, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (values) {
       try {
         setLoading(true);
+
         const result = await signIn("credentials", {
           email: values.email,
           password: values.password,
+          rememberMe: values.rememberMe,
           redirect: false,
         });
         if (result?.error) {
+          setFailedAttempts(failedAttempts + 1);
           toastService.error(result?.error);
         } else if (result?.ok) {
           toastService.success("Login Succesful.");
@@ -159,7 +177,7 @@ const Login = () => {
                 <div className="flex items-center justify-between pt-2 text-secondary">
                   <FormField
                     control={form.control}
-                    name="rememberme"
+                    name="rememberMe"
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
@@ -183,7 +201,11 @@ const Login = () => {
                     Forgot Password
                   </Button>
                 </div>
-
+                {failedAttempts > 0 && (
+                  <p className="text-center text-xl text-red-500">
+                    You have {5 - failedAttempts} attepmts left.
+                  </p>
+                )}
                 <div className="flex justify-end pt-4">
                   <Button
                     variant={"secondary"}
@@ -199,12 +221,20 @@ const Login = () => {
             </Form>
           )}
           {showForgotPassword && (
-            <ForgotPassword
-              onSuccess={() => {
-                setOpen(false);
-                setShowForgotPassword(false);
-              }}
-            />
+            <>
+              <p className="text-center text-2xl text-red-500">
+                {failedAttempts === 5
+                  ? "Your account has been locked. You have to reset your password."
+                  : null}
+              </p>
+
+              <ForgotPassword
+                onSuccess={() => {
+                  setOpen(false);
+                  setShowForgotPassword(false);
+                }}
+              />
+            </>
           )}
         </DialogContent>
       </Dialog>
