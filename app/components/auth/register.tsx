@@ -28,11 +28,14 @@ import {
 import EpSpinner from "@/components/ui/ep-spinner";
 import VerificationForm from "./verification";
 import toastService from "@/lib/toastservice";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { verifyRecaptcha } from "@/actions/verifyTokent";
 
 const Register = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailSent, setemailSent] = useState(false);
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const formSchema = z.object({
     email: z
@@ -60,10 +63,37 @@ const Register = () => {
     },
   });
 
+  const verifyToken = async () => {
+    if (!executeRecaptcha) {
+      console.log("Execute recaptcha not yet available");
+      return false;
+    }
+
+    const token = await executeRecaptcha("login");
+
+    const res = await verifyRecaptcha(token as string);
+    if (!res?.success) {
+      toastService.error("Recaptcha Validation Error. Try again.");
+      return false;
+    } else {
+      if (res.data && res.data.score < 0.5) {
+        toastService.error("Suspicious activity detected. We can't proceed");
+        return false;
+      }
+    }
+    return true;
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (values) {
       try {
         setLoading(true);
+
+        if (!(await verifyToken())) {
+          setLoading(false);
+          return;
+        }
+
         const result = await register({
           email: values.email,
           password: values.password,

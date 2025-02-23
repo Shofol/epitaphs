@@ -8,7 +8,7 @@ export interface UserDocument {
   phone?: string;
   image?: string;
   verified?: string;
-  active: boolean;
+  active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   verificationCode?: number;

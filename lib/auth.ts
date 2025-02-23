@@ -31,7 +31,7 @@ export const authOptions: NextAuthOptions = {
         if (!user.verified)
           throw new Error("Email is not verified yet. Please verify to login");
         if (!user.active) {
-          throw new Error("Your account is locked. Please reset your password");
+          throw new Error("Locked");
         }
 
         const maxAge =

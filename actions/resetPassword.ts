@@ -12,7 +12,7 @@ export const reset = async (email: string, password: string) => {
     const user = await User.findOneAndUpdate(
       { email },
       {
-        $set: { password: hashedPassword },
+        $set: { password: hashedPassword, active: true },
         $unset: { passwordResetLinkExpires: 1 },
       },
       { new: true }, // Return the updated user

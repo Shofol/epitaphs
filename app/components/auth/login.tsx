@@ -29,8 +29,11 @@ import toastService from "@/lib/toastservice";
 import { Checkbox } from "@/components/ui/checkbox";
 import ForgotPassword from "./forgotPassword";
 import { inactivate } from "@/actions/inactivate";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { verifyRecaptcha } from "@/actions/verifyTokent";
 
 const Login = () => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const router = useRouter();
@@ -66,8 +69,7 @@ const Login = () => {
 
   useEffect(() => {
     const inactivateAccount = async () => {
-      const res = await inactivate(form.getValues("email"));
-      console.log(res);
+      await inactivate(form.getValues("email"));
       setShowForgotPassword(true);
       form.reset();
     };
@@ -82,6 +84,11 @@ const Login = () => {
       try {
         setLoading(true);
 
+        if (!(await verifyToken())) {
+          setLoading(false);
+          return;
+        }
+
         const result = await signIn("credentials", {
           email: values.email,
           password: values.password,
@@ -89,8 +96,16 @@ const Login = () => {
           redirect: false,
         });
         if (result?.error) {
-          setFailedAttempts(failedAttempts + 1);
-          toastService.error(result?.error);
+          if (result?.error === "Locked") {
+            setFailedAttempts(5);
+            toastService.error(
+              "Your account is locked. Please reset your password",
+            );
+            setShowForgotPassword(true);
+          } else {
+            setFailedAttempts(failedAttempts + 1);
+            toastService.error(result?.error);
+          }
         } else if (result?.ok) {
           toastService.success("Login Succesful.");
           return router.push("/home");
@@ -102,6 +117,27 @@ const Login = () => {
       }
     }
   }
+
+  const verifyToken = async () => {
+    if (!executeRecaptcha) {
+      console.log("Execute recaptcha not yet available");
+      return false;
+    }
+
+    const token = await executeRecaptcha("login");
+
+    const res = await verifyRecaptcha(token as string);
+    if (!res?.success) {
+      toastService.error("Recaptcha Validation Error. Try again.");
+      return false;
+    } else {
+      if (res.data && res.data.score < 0.5) {
+        toastService.error("Suspicious activity detected. We can't proceed");
+        return false;
+      }
+    }
+    return true;
+  };
 
   return (
     <div className="font-garamond">
